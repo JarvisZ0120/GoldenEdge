@@ -14,7 +14,7 @@ class MACDGridM1:
             signalperiod: int, 信号线 EMA 周期 (默认 9)
         """
         if 'close' not in df.columns:
-            raise ValueError("DataFrame 缺失 'close' 列！")
+            print("⚠️ DataFrame 缺失 'close' 列, 无法计算 MACD! ")
         
         self.df = df
         self.fastperiod = fastperiod
@@ -28,6 +28,10 @@ class MACDGridM1:
         返回：
             tuple: (最新的 MACD 值, MACD 信号线, MACD 柱状图)
         """
+        if len(self.df) < self.slowperiod + 1:
+            print("⚠️ 数据量太少，无法计算 MACD! ")
+            return False
+        
         macd, signal, hist = talib.MACD(self.df['close'], 
                                         fastperiod=self.fastperiod, 
                                         slowperiod=self.slowperiod, 
@@ -39,12 +43,8 @@ class MACDGridM1:
         判断是否出现 MACD 金叉（多头信号）
         
         返回：
-            bool: 若 MACD 线上穿信号线，则返回 True（多头信号），否则返回 False
+            bool: 若 MACD 线上穿信号线，则返回 True (多头信号),否则返回 False
         """
-        if len(self.df) < self.slowperiod:
-            print("⚠️ 数据量太少，无法计算 MACD！")
-            return False
-
         macd, signal, _ = self.get_macd()
         return macd > signal  # MACD 线上穿信号线，表示金叉（看涨信号）
 
@@ -53,12 +53,8 @@ class MACDGridM1:
         判断是否出现 MACD 死叉（空头信号）
         
         返回：
-            bool: 若 MACD 线下穿信号线，则返回 True（空头信号），否则返回 False
+            bool: 若 MACD 线下穿信号线，则返回 True(空头信号), 否则返回 False
         """
-        if len(self.df) < self.slowperiod:
-            print("⚠️ 数据量太少，无法计算 MACD！")
-            return False
-
         macd, signal, _ = self.get_macd()
         return macd < signal  # MACD 线下穿信号线，表示死叉（看跌信号）
 

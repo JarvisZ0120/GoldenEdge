@@ -12,7 +12,7 @@ class RSIGridM1:
             timeperiod: int, 计算 RSI 的周期（默认 14）
         """
         if 'close' not in df.columns:
-            raise ValueError("DataFrame 缺失 'close' 列！")
+            print("⚠️ DataFrame 缺失 'close' 列, 无法计算RSI! ")
         
         self.df = df
         self.timeperiod = timeperiod
@@ -24,6 +24,10 @@ class RSIGridM1:
         返回：
             float: 最新的 RSI 值
         """
+        if len(self.df) < self.timeperiod + 1:
+            print("⚠️ 数据量太少， 无法计算 RSI! ")
+            return False
+        
         rsi_series = talib.RSI(self.df['close'], timeperiod=self.timeperiod)
         return round(rsi_series.iloc[-1], 3)
 
@@ -38,8 +42,7 @@ class RSIGridM1:
         返回：
             bool: 若 RSI > threshold, 则返回 True (超买), 否则返回 False
         """
-        rsi_value = self.get_rsi()
-        return rsi_value > threshold
+        return self.get_rsi() > threshold
 
     def is_oversold(self, threshold=35):
         """
@@ -52,8 +55,7 @@ class RSIGridM1:
         返回：
             bool: 若 RSI < threshold, 则返回 True (超卖), 否则返回 False
         """
-        rsi_value = self.get_rsi()
-        return rsi_value < threshold
+        return self.get_rsi() < threshold
 
 # 示例用法
 if __name__ == "__main__":

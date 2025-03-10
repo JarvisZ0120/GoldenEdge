@@ -9,8 +9,11 @@ class ATRGridM1:
         
         参数：
             df: pandas DataFrame, 必须包含 'high', 'low', 'close' 列
-            timeperiod: int, 计算 ATR 的周期（默认 14）
+            timeperiod: int, 计算 ATR 的周期(默认 14)
         """
+        required_cols = ['high', 'low', 'close']
+        if not all(col in df.columns for col in required_cols):
+            print(f"⚠️ DataFrame 缺失 'high', 'low', 'close' 列, 无法计算ATR! ")
         self.df = df
         self.timeperiod = timeperiod
 
@@ -21,35 +24,10 @@ class ATRGridM1:
         返回：
             float: 最新的 ATR 值
         """
+        if len(self.df) < self.timeperiod + 1:
+            print("⚠️ 数据量太少，无法计算 ATR! ")
         atr_series = talib.ATR(self.df['high'], self.df['low'], self.df['close'], timeperiod=self.timeperiod)
         return round(atr_series.iloc[-1], 3)
-
-    # def is_high_volatility(self, threshold=1.5):
-    #     """
-    #     判断市场是否处于高波动状态
-        
-    #     参数：
-    #         threshold: float, ATR 高波动阈值 (默认 1.5)
-        
-    #     返回：
-    #         bool: 若 ATR > threshold, 则返回 True (高波动)，否则返回 False
-    #     """
-    #     atr_value = self.get_atr()
-    #     return atr_value > threshold
-
-    # def is_low_volatility(self, threshold=0.5):
-        """
-        判断市场是否处于低波动状态
-        
-        参数：
-            threshold: float, ATR 低波动阈值 (默认 0.5)
-        
-        返回：
-            bool: 若 ATR < threshold, 则返回 True (低波动)，否则返回 False
-        """
-        atr_value = self.get_atr()
-        return atr_value < threshold
-
 
 # 示例用法：
 if __name__ == "__main__":
@@ -69,15 +47,3 @@ if __name__ == "__main__":
     # 获取 ATR
     atr_value = atr_analyzer.get_atr()
     print(f"最新的 ATR 值: {atr_value}")
-    
-    # # 判断是否高波动
-    # if atr_analyzer.is_high_volatility():
-    #     print("市场处于高波动状态！")
-    # else:
-    #     print("市场未达到高波动标准。")
-    
-    # # 判断是否低波动
-    # if atr_analyzer.is_low_volatility():
-    #     print("市场处于低波动状态！")
-    # else:
-    #     print("市场未达到低波动标准。")
