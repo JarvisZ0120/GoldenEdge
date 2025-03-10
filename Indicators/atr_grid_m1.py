@@ -29,6 +29,20 @@ class ATRGridM1:
         atr_series = talib.ATR(self.df['high'], self.df['low'], self.df['close'], timeperiod=self.timeperiod)
         return round(atr_series.iloc[-1], 3)
 
+    def get_dynamic_atr(self):
+        """ 计算 ATR 并动态调整 SL/TP """
+        dynamic_atr = self.get_atr()
+        
+        if dynamic_atr is None or dynamic_atr <= 0:
+            dynamic_atr = 0.5  # M1 默认 0.5 美元
+            print("⚠️ M1 Dynamic ATR 计算失败！")
+
+        # 限制 ATR 适用范围，避免 SL 过大或过小
+        dynamic_atr = max(0.3, min(dynamic_atr, 2.0))  # 限制 ATR 在 0.3 - 2.0 之间
+        # 记录 ATR 计算日志
+        # print(f"✅ M1 Dynamic ATR 计算成功: {dynamic_atr}")
+        return dynamic_atr
+    
 # 示例用法：
 if __name__ == "__main__":
     # 模拟数据示例
@@ -46,4 +60,6 @@ if __name__ == "__main__":
     
     # 获取 ATR
     atr_value = atr_analyzer.get_atr()
+    dynamic_atr_value = atr_analyzer.get_dynamic_atr()
     print(f"最新的 ATR 值: {atr_value}")
+    print(f"最新的 Dynamic ATR 值: {atr_value}")
