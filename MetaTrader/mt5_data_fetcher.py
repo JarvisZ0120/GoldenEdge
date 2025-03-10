@@ -39,7 +39,7 @@ class MT5DataFetcher:
         rates = mt5.copy_rates_from_pos(symbol, timeframe, 0, 1000)
         
         if rates is None or len(rates) == 0:
-            print("⚠️ 无法获取数据")
+            print("⚠️ 无法获取数据! ")
             return pd.DataFrame()
         
         # 转换为 DataFrame 格式
