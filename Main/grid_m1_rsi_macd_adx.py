@@ -45,7 +45,7 @@ if __name__ == "__main__":
         ohlcv_data = mt5_data_fetcher.fetch_ohlcv(symbol, timeframe)
 
         # 获取 MACD
-        macd_analyzer = MACDGridM1(ohlcv_data)
+        macd_analyzer = MACDGridM1(ohlcv_data, 12, 26, 9)
         macd, signal, hist = macd_analyzer.get_macd()
         # 判断是否出现金叉（多头信号）和死叉（空头信号）
         is_bullish = macd_analyzer.is_macd_bullish()
@@ -55,30 +55,33 @@ if __name__ == "__main__":
         logger.info(f"Hist: {hist: .2f}")
 
         # 获取 RSI
-        rsi_analyzer = RSIGridM1(ohlcv_data)
+        rsi_analyzer = RSIGridM1(ohlcv_data, 14)
         rsi_value = rsi_analyzer.get_rsi()
         # 判断超买超卖
-        is_overbought = rsi_analyzer.is_overbought()
-        is_oversold = rsi_analyzer.is_oversold()
+        is_overbought = rsi_analyzer.is_overbought(65)
+        is_oversold = rsi_analyzer.is_oversold(35)
         # 显示数据
         print(f"RSI: {rsi_value}")
         logger.info(f"RSI: {rsi_value: .2f}")
 
         # 获取 ADX
-        adx_analyzer = ADXGridM1(ohlcv_data)
+        adx_analyzer = ADXGridM1(ohlcv_data, 30)
         adx_value = adx_analyzer.get_adx()
-        is_range_market = adx_analyzer.is_range_market()
+        is_range_market = adx_analyzer.is_range_market(40)
         print(f"ADX: {adx_value}")
         logger.info(f"ADX: {adx_value: .2f}")
 
         # 获取 ATR
-        atr_analyzer = ATRGridM1(ohlcv_data)
+        atr_analyzer = ATRGridM1(ohlcv_data, 14)
         atr_value = atr_analyzer.get_atr()
+        dynamic_atr_value = atr_analyzer.get_dynamic_atr()
         print(f"ATR: {atr_value}")
         logger.info(f"ATR: {atr_value: .2f}")
+        print(f"Dynamic ATR: {dynamic_atr_value}")
+        logger.info(f"Dynamic ATR: {dynamic_atr_value: .2f}")
 
         # 下单
-        mt5_grid_trader = MT5GridTrader(mt5_connection, symbol, lot_size, max_grid_orders, grid_step, timeframe, atr_value, log_manager)
+        mt5_grid_trader = MT5GridTrader(mt5_connection, symbol, lot_size, max_grid_orders, grid_step, timeframe, dynamic_atr_value, log_manager)
         if not mt5_grid_trader.has_active_orders():
             mt5_grid_trader.remove_orders(mt5.ORDER_TYPE_BUY_LIMIT)
             mt5_grid_trader.remove_orders(mt5.ORDER_TYPE_SELL_LIMIT)
@@ -96,4 +99,4 @@ if __name__ == "__main__":
                 mt5_grid_trader.place_grid_orders("sell")
                 mt5_grid_trader.remove_orders(mt5.ORDER_TYPE_BUY_LIMIT)
 
-        time.sleep(5)  # 每 10 秒运行一次策略
+        time.sleep(10)  # 每 10 秒运行一次策略
