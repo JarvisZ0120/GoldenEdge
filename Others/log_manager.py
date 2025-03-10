@@ -1,10 +1,14 @@
 import logging
+import os
 from datetime import datetime
 
 class LogManager:
-    def __init__(self, prefix="app_M1"):
+    def __init__(self, prefix="app_M1", log_dir="Logs"):
+        self.log_dir = log_dir
+        os.makedirs(self.log_dir, exist_ok=True)
+
         self.date_time_str = datetime.now().strftime("%Y%m%d_%H%M%S")
-        self.log_filename = f"{prefix}_{self.date_time_str}.log"
+        self.log_filename = os.path.join(self.log_dir, f"{prefix}_{self.date_time_str}.log")
         self._configure_logging()
     
     def _configure_logging(self):
@@ -20,8 +24,8 @@ class LogManager:
     def get_logger():
         return logging.getLogger()
 
-# 使用示例
-if __name__ == "__main__":
-    log_manager = LogManager()
-    logger = log_manager.get_logger()
-    logger.info("logger 初始化成功！")
+# # 使用示例
+# if __name__ == "__main__":
+#     log_manager = LogManager()
+#     logger = log_manager.get_logger()
+#     logger.info("logger 初始化成功！")
