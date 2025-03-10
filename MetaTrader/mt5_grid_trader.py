@@ -8,7 +8,7 @@
 # from Others.log_manager import LogManager
 
 class MT5GridTrader:
-    def __init__(self, mt5_connection, symbol, lot_size, max_grid_orders, grid_step, timeframe, atr, log_manager):
+    def __init__(self, mt5_connection, symbol, lot_size, max_grid_orders, grid_step, timeframe, dynamic_atr, log_manager):
         self.mt5_connection = mt5_connection
         self.mt5 = self.mt5_connection.get_mt5()
         self.symbol = symbol
@@ -16,7 +16,7 @@ class MT5GridTrader:
         self.max_grid_orders = max_grid_orders
         self.grid_step = grid_step
         self.timeframe = self.get_timeframe(timeframe)
-        self.atr = atr
+        self.dynamic_atr = dynamic_atr
         self.logger = log_manager.get_logger()
     
     def get_timeframe(self,timrframe):
@@ -41,7 +41,7 @@ class MT5GridTrader:
         
         for i in range(self.max_grid_orders):
             grid_price = (price - i * self.grid_step) if direction == "buy" else (price + i * self.grid_step)
-            atr = self.get_dynamic_atr()
+            atr = self.dynamic_atr
             
             request = {
                 "action": self.mt5.TRADE_ACTION_PENDING,
