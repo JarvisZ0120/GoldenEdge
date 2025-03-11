@@ -63,7 +63,10 @@ pip install numpy pandas requests ta binance
   ```
 
 ## 📈 策略优化与回测
-- **MT4/MT5** 提供内置日志文件，可调整参数优化交易策略  
+- **MT4/MT5** 提供内置日志文件，可调整参数优化交易策略 
+
+## 文件名格式
+- ** {指标}_{策略}_{timeframe}.py **  
 
 
 ## ⚠️ 风险提示

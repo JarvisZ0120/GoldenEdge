@@ -2,10 +2,10 @@ import time
 from MetaTrader.mt5_connection import MT5Connection
 from MetaTrader.mt5_data_fetcher import MT5DataFetcher
 from MetaTrader.mt5_grid_trader import MT5GridTrader
-from Indicators.macd_grid_m1 import MACDGridM1
-from Indicators.rsi_grid_m1 import RSIGridM1
-from Indicators.adx_grid_m1 import ADXGridM1
-from Indicators.atr_grid_m1 import ATRGridM1
+from Indicators.macd import MACD
+from Indicators.rsi import RSI
+from Indicators.adx import ADX
+from Indicators.atr import ATR
 from Others.log_manager import LogManager
 
 if __name__ == "__main__":
@@ -30,7 +30,6 @@ if __name__ == "__main__":
     # 连接到 MT5
     mt5_connection.connect()
     mt5 = mt5_connection.get_mt5()
-    # mt5_connection.disconnect()
 
     # 循环爬取数据并进行下单操作
     while True:
@@ -45,7 +44,7 @@ if __name__ == "__main__":
         ohlcv_data = mt5_data_fetcher.fetch_ohlcv(symbol, timeframe)
 
         # 获取 MACD
-        macd_analyzer = MACDGridM1(ohlcv_data, 12, 26, 9)
+        macd_analyzer = MACD(ohlcv_data, 12, 26, 9)
         macd, signal, hist = macd_analyzer.get_macd()
         # 判断是否出现金叉（多头信号）和死叉（空头信号）
         is_bullish = macd_analyzer.is_macd_bullish()
@@ -55,7 +54,7 @@ if __name__ == "__main__":
         logger.info(f"Hist: {hist: .2f}")
 
         # 获取 RSI
-        rsi_analyzer = RSIGridM1(ohlcv_data, 14)
+        rsi_analyzer = RSI(ohlcv_data, 14)
         rsi_value = rsi_analyzer.get_rsi()
         # 判断超买超卖
         is_overbought = rsi_analyzer.is_overbought(65)
@@ -65,14 +64,14 @@ if __name__ == "__main__":
         logger.info(f"RSI: {rsi_value: .2f}")
 
         # 获取 ADX
-        adx_analyzer = ADXGridM1(ohlcv_data, 30)
+        adx_analyzer = ADX(ohlcv_data, 30)
         adx_value = adx_analyzer.get_adx()
         is_range_market = adx_analyzer.is_range_market(40)
         print(f"ADX: {adx_value}")
         logger.info(f"ADX: {adx_value: .2f}")
 
         # 获取 ATR
-        atr_analyzer = ATRGridM1(ohlcv_data, 14)
+        atr_analyzer = ATR(ohlcv_data, 14)
         atr_value = atr_analyzer.get_atr()
         dynamic_atr_value = atr_analyzer.get_dynamic_atr()
         print(f"ATR: {atr_value}")

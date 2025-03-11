@@ -2,7 +2,7 @@ import pandas as pd
 import talib
 
 
-class MACDGridM1:
+class MACD:
     def __init__(self, df, fastperiod=12, slowperiod=26, signalperiod=9):
         """
         初始化 MACD 指标计算类
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     df = pd.DataFrame(data)
 
     # 创建 macd_grid_m1 实例
-    macd_analyzer = MACDGridM1(df)
+    macd_analyzer = MACD(df)
 
     # 获取最新的 MACD 值和信号线
     macd, signal, hist = macd_analyzer.get_macd()

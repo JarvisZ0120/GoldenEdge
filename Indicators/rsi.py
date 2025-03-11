@@ -2,7 +2,7 @@ import pandas as pd
 import talib
 
 
-class RSIGridM1:
+class RSI:
     def __init__(self, df, timeperiod=14):
         """
         初始化 RSI 指标计算类
@@ -31,7 +31,7 @@ class RSIGridM1:
         rsi_series = talib.RSI(self.df['close'], timeperiod=self.timeperiod)
         return round(rsi_series.iloc[-1], 3)
 
-    def is_overbought(self, threshold=65):
+    def is_overbought(self, threshold):
         """
         判断市场是否处于超买状态
         当 RSI 高于设定阈值时，可认为市场超买。
@@ -44,7 +44,7 @@ class RSIGridM1:
         """
         return self.get_rsi() > threshold
 
-    def is_oversold(self, threshold=35):
+    def is_oversold(self, threshold):
         """
         判断市场是否处于超卖状态
         当 RSI 低于设定阈值时，可认为市场超卖。
@@ -67,20 +67,20 @@ if __name__ == "__main__":
     }
     df = pd.DataFrame(data)
     
-    rsi_analyzer = RSIGridM1(df)
+    rsi_analyzer = RSI(df)
     
     # 获取 RSI
     rsi_value = rsi_analyzer.get_rsi()
     print(f"最新的 RSI 值: {rsi_value}")
     
     # 判断是否超买
-    if rsi_analyzer.is_overbought():
+    if rsi_analyzer.is_overbought(65):
         print("市场超买！")
     else:
         print("市场没有超买。")
     
     # 判断是否超卖
-    if rsi_analyzer.is_oversold():
+    if rsi_analyzer.is_oversold(35):
         print("市场超卖！")
     else:
         print("市场没有超卖。")

@@ -2,7 +2,7 @@ import pandas as pd
 import talib
 
 
-class ADXGridM1:
+class ADX:
     def __init__(self, df, timeperiod=30):
         """
         初始化 ADXIndicator 类，用于计算 ADX 指标。
@@ -32,7 +32,7 @@ class ADXGridM1:
         adx_series = talib.ADX(self.df['high'], self.df['low'], self.df['close'], timeperiod=self.timeperiod)
         return round(adx_series.iloc[-1], 3)
 
-    def is_range_market(self, threshold=35):
+    def is_range_market(self, threshold):
         """
         判断市场是否为震荡市场 (范围盘),
         当 ADX 值低于设定阈值 (例如 35) 时，认为市场处于震荡状态。
@@ -45,7 +45,7 @@ class ADXGridM1:
         """
         return self.get_adx() < threshold
     
-    def is_trending_market(self, threshold=35):
+    def is_trending_market(self, threshold):
         """
         判断市场是否为趋势行情。
         当 ADX 值大于设定阈值时，认为市场处于趋势行情。
@@ -61,6 +61,8 @@ class ADXGridM1:
 # 示例用法
 if __name__ == "__main__":
     # 模拟数据示例，实际使用时需要从你的数据源获取数据
+
+    # TODO: data 中数据不足30 周期， 需修改 ---- Damon
     data = {
         "high": [1.10, 1.12, 1.14, 1.13, 1.12, 1.15, 1.17, 1.18, 1.16, 1.19, 1.18, 1.20, 1.10, 1.12, 1.14, 1.13, 1.12, 1.15, 1.17, 1.18, 1.16, 1.19, 1.18, 1.20, 
                  1.10, 1.12, 1.14, 1.13, 1.12, 1.15, 1.17, 1.18, 1.16, 1.19, 1.18, 1.20, 1.10, 1.12, 1.14, 1.13, 1.12, 1.15, 1.17, 1.18, 1.16, 1.19, 1.18, 1.20],
@@ -71,16 +73,16 @@ if __name__ == "__main__":
     }
     df = pd.DataFrame(data)
     
-    adx_analyzer = ADXGridM1(df)
+    adx_analyzer = ADX(df)
     
     # 获取 ADX
     adx_value = adx_analyzer.get_adx()
     print(f"最新的 ADX 值: {adx_value}")
     
     # 判断是否为震荡市场
-    if adx_analyzer.is_range_market():
+    if adx_analyzer.is_range_market(35):
         print("市场处于震荡状态。")
-    elif adx_analyzer.is_trending_market():
+    elif adx_analyzer.is_trending_market(35):
         print("市场处于趋势状态。")
     else:
         print("没判断出来！")
