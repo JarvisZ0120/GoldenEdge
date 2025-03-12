@@ -17,15 +17,9 @@ class LogManager:
             format='%(asctime)s - %(levelname)s - %(message)s',
             filename=self.log_filename,
             filemode='a',
-            encoding="utf-8"  # 添加 encoding="utf-8"
+            encoding="utf-8"  
         )
     
     @staticmethod
     def get_logger():
         return logging.getLogger()
-
-# # 使用示例
-# if __name__ == "__main__":
-#     log_manager = LogManager()
-#     logger = log_manager.get_logger()
-#     logger.info("logger 初始化成功！")
