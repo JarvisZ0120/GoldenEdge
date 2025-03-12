@@ -1,5 +1,6 @@
 import pandas as pd
 import talib
+import numpy as np
 
 
 class ATR:
@@ -17,8 +18,6 @@ class ATR:
         self.df = df
         self.timeperiod = timeperiod
 
-
-    # TODO: atr methiod 需要修改 --- Jarvis
     def get_atr(self):
         """
         计算 ATR (Average True Range)
@@ -28,9 +27,29 @@ class ATR:
         """
         if len(self.df) < self.timeperiod + 1:
             print("⚠️ 数据量太少，无法计算 ATR! ")
-        atr_series = talib.ATR(self.df['high'], self.df['low'], self.df['close'], timeperiod=self.timeperiod)
-        return round(atr_series.iloc[-1], 3)
 
+        # 计算 True Range (TR)
+        self.df['high-low'] = self.df['high'] - self.df['low']
+        self.df['high-prevclose'] = abs(self.df['high'] - self.df['close'].shift(1))
+        self.df['low-prevclose'] = abs(self.df['low'] - self.df['close'].shift(1))
+        
+        # 取三者的最大值作为 TR
+        self.df['tr'] = self.df[['high-low', 'high-prevclose', 'low-prevclose']].max(axis=1)
+        
+        # 计算 ATR (14周期)
+        self.df['atr'] = self.df['tr'].rolling(window=self.timeperiod).mean()
+
+        # 获取最新 ATR 值
+        atr_value = round(self.df['atr'].iloc[-1], 3)
+
+        # 处理 ATR 计算失败的情况（避免 NaN）
+        if np.isnan(atr_value) or atr_value <= 0:
+            print(f"⚠️ ATR 计算失败，返回默认值 1.0")
+            return 1.0
+
+        # 打印 ATR 结果
+        print(f"✅ ATR 计算成功: {atr_value}")
+        return atr_value
 
 
     def get_dynamic_atr(self):
