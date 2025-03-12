@@ -13,7 +13,7 @@ class ATR:
         """
         required_cols = ['high', 'low', 'close']
         if not all(col in df.columns for col in required_cols):
-            print(f"⚠️ DataFrame 缺失 'high', 'low', 'close' 列, 无法计算ATR! ")
+            print(f"⚠️ 数据缺失 'high', 'low', 'close' 列, 无法计算ATR! ")
         self.df = df
         self.timeperiod = timeperiod
 
@@ -64,5 +64,5 @@ if __name__ == "__main__":
     # 获取 ATR
     atr_value = atr_analyzer.get_atr()
     dynamic_atr_value = atr_analyzer.get_dynamic_atr()
-    print(f"最新的 ATR 值: {atr_value}")
-    print(f"最新的 Dynamic ATR 值: {atr_value}")
+    print(f"ATR: {atr_value}")
+    print(f"Dynamic ATR: {dynamic_atr_value}")
