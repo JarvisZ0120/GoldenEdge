@@ -14,7 +14,7 @@ class MACD:
             signalperiod: int, 信号线 EMA 周期 (默认 9)
         """
         if 'close' not in df.columns:
-            print("⚠️ DataFrame 缺失 'close' 列, 无法计算 MACD! ")
+            print("⚠️ 数据缺失 'close' 列, 无法计算 MACD! ")
         
         self.df = df
         self.fastperiod = fastperiod
@@ -66,10 +66,10 @@ if __name__ == "__main__":
     }
     df = pd.DataFrame(data)
 
-    # 创建 macd_grid_m1 实例
+    # 创建 macd 实例
     macd_analyzer = MACD(df)
 
-    # 获取最新的 MACD 值和信号线
+    # 获取 MACD 值和信号线
     macd, signal, hist = macd_analyzer.get_macd()
 
     # 判断是否出现金叉（多头信号）和死叉（空头信号）
@@ -77,7 +77,7 @@ if __name__ == "__main__":
     is_bearish = macd_analyzer.is_macd_bearish()
 
     # 输出结果
-    print(f"Latest MACD: {macd}, Signal: {signal}, Histogram: {hist}")
+    print(f"MACD: {macd}, Signal: {signal}, Histogram: {hist}")
     print(f"是否金叉：{is_bullish}")
     print(f"是否死叉：{is_bearish}")
 
