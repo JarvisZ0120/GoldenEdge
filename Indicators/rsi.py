@@ -12,7 +12,7 @@ class RSI:
             timeperiod: int, 计算 RSI 的周期（默认 14）
         """
         if 'close' not in df.columns:
-            print("⚠️ DataFrame 缺失 'close' 列, 无法计算RSI! ")
+            print("⚠️ 数据缺失 'close' 列, 无法计算RSI! ")
         
         self.df = df
         self.timeperiod = timeperiod
@@ -59,7 +59,7 @@ class RSI:
 
 # 示例用法
 if __name__ == "__main__":
-    # 模拟数据示例，实际使用时需要从你的数据源获取数据
+    # 模拟数据示例
     data = {
         "close": [1.10, 1.12, 1.14, 1.13, 1.12, 1.15, 1.17, 1.18, 1.16, 1.19, 1.18, 1.20,
                   1.10, 1.12, 1.14, 1.13, 1.12, 1.15, 1.17, 1.18, 1.16, 1.19, 1.18, 1.2, 
@@ -67,20 +67,13 @@ if __name__ == "__main__":
     }
     df = pd.DataFrame(data)
     
-    rsi_analyzer = RSI(df)
-    
     # 获取 RSI
+    rsi_analyzer = RSI(df)
     rsi_value = rsi_analyzer.get_rsi()
-    print(f"最新的 RSI 值: {rsi_value}")
+    print(f"RSI: {rsi_value}")
     
-    # 判断是否超买
+    # 判断是否超买超卖
     if rsi_analyzer.is_overbought(65):
         print("市场超买！")
-    else:
-        print("市场没有超买。")
-    
-    # 判断是否超卖
     if rsi_analyzer.is_oversold(35):
         print("市场超卖！")
-    else:
-        print("市场没有超卖。")
