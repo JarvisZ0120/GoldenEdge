@@ -27,6 +27,7 @@ class ATR:
         """
         if len(self.df) < self.timeperiod + 1:
             print("⚠️ 数据量太少，无法计算 ATR! ")
+            return 1.0
 
         # 计算 True Range (TR)
         self.df['high-low'] = self.df['high'] - self.df['low']
