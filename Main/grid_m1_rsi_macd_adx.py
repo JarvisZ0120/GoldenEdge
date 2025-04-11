@@ -1,12 +1,12 @@
 import time
-from MetaTrader.mt5_connection import MT5Connection
-from MetaTrader.mt5_data_fetcher import MT5DataFetcher
-from MetaTrader.mt5_grid_trader import MT5GridTrader
-from Indicators.macd import MACD
-from Indicators.rsi import RSI
-from Indicators.adx import ADX
-from Indicators.atr import ATR
-from Others.log_manager import LogManager
+from metatrader.mt5_connection import MT5Connection
+from metatrader.mt5_data_fetcher import MT5DataFetcher
+from metatrader.mt5_grid_trader import MT5GridTrader
+from indicators.macd import MACD
+from indicators.rsi import RSI
+from indicators.adx import ADX
+from indicators.atr import ATR
+from others.log_manager import LogManager
 
 if __name__ == "__main__":
     # 配置 log 文件

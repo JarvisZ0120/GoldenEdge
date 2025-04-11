@@ -1,6 +1,6 @@
 import pandas as pd
-from MetaTrader.mt5_connection import MT5Connection
-from Others.log_manager import LogManager
+from metatrader.mt5_connection import MT5Connection
+from others.log_manager import LogManager
 
 
 class MT5DataFetcher:

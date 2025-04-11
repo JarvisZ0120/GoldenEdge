@@ -1,5 +1,5 @@
 import MetaTrader5 as mt5
-from Others.log_manager import LogManager
+from others.log_manager import LogManager
 
 
 class MT5Connection:
