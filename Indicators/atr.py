@@ -47,9 +47,7 @@ class ATR:
         if np.isnan(atr_value) or atr_value <= 0:
             print(f"⚠️ ATR 计算失败，返回默认值 1.0")
             return 1.0
-
-        # 打印 ATR 结果
-        print(f"✅ ATR 计算成功: {atr_value}")
+        
         return atr_value
 
 
