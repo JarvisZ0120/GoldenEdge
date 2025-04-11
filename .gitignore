@@ -1,3 +1,4 @@
 # 忽略 Python 编译文件
 __pycache__/
 *.pyc
+Logs/*
