@@ -3,91 +3,380 @@ import talib
 
 
 class ADX:
-    def __init__(self, df, timeperiod=30):
+    def __init__(self, df: pd.DataFrame, timeperiod: int = 14) -> None:
         """
-        初始化 ADXIndicator 类，用于计算 ADX 指标。
+        Initialize the ADX class for calculating the Average Directional Index.
 
-        参数：
-            df: pandas DataFrame, 必须包含 'high', 'low', 'close' 列
-            timeperiod: int, 计算 ADX 的周期(默认 30)
+        Args:
+            df (pd.DataFrame): A DataFrame that must contain 'high', 'low', and 'close' columns.
+            timeperiod (int, optional): Period for calculating ADX. Default is 14.
+
+        Raises:
+            ValueError: If the required columns are missing in the input DataFrame.
         """
-        required_cols = ['high', 'low', 'close']
+        required_cols = ["high", "low", "close"]
         if not all(col in df.columns for col in required_cols):
-            print(f"⚠️ 数据缺失 'high', 'low', 'close' 列, 无法计算ADX! ")
-        
+            raise ValueError(
+                "⚠️ Missing columns 'high', 'low', or 'close'. Cannot compute ADX."
+            )
+
         self.df = df
         self.timeperiod = timeperiod
 
-    def get_adx(self):
+    def get_adx(self) -> float | bool:
         """
-        计算并返回最新的 ADX 值。
+        Calculate and return the most recent ADX value.
 
-        返回：
-            float: 最新的 ADX 值
+        Returns:
+            float: The latest ADX value (rounded to 3 decimal places).
+            bool: False if there is insufficient data to calculate ADX.
         """
         if len(self.df) < self.timeperiod + 1:
-            print("⚠️ 数据量太少，无法计算 ADX! ")
+            print("⚠️ Not enough data to compute ADX.")
             return False
-        
-        adx_series = talib.ADX(self.df['high'], self.df['low'], self.df['close'], timeperiod=self.timeperiod)
-        return round(adx_series.iloc[-1], 3)
 
-    def is_range_market(self, threshold):
-        """
-        判断市场是否为震荡市场 (范围盘),
-        当 ADX 值低于设定阈值时，认为市场处于震荡状态。
+        adx_array = talib.ADX(
+            self.df["high"].to_numpy(),
+            self.df["low"].to_numpy(),
+            self.df["close"].to_numpy(),
+            timeperiod=self.timeperiod,
+        )
+        return round(adx_array[-1], 3)
 
-        参数：
-            threshold: float, 判断震荡市场的 ADX 阈值
-        
-        返回：
-            bool: 若 ADX < threshold, 则返回 True (震荡市场)，否则返回 False (趋势市场)
+    def is_range_market(self, threshold: float) -> bool:
         """
-        return self.get_adx() < threshold
-    
-    def is_trending_market(self, threshold):
-        """
-        判断市场是否为趋势行情。
-        当 ADX 值大于设定阈值时，认为市场处于趋势行情。
+        Determine if the market is in a ranging (sideways) condition.
 
-        参数：
-            threshold: float, 判断趋势市场的 ADX 阈值 
-        
-        返回：
-            bool: 若 ADX > threshold, 则返回 True (趋势行情)，否则返回 False (震荡市场)
-        """
-        return self.get_adx() >= threshold
+        Args:
+            threshold (float): The ADX threshold below which the market is considered ranging.
 
-# 示例用法
+        Returns:
+            bool: True if ADX < threshold (ranging market), otherwise False.
+        """
+        adx = self.get_adx()
+        return adx is not False and adx < threshold
+
+    def is_trending_market(self, threshold: float) -> bool:
+        """
+        Determine if the market is in a trending condition.
+
+        Args:
+            threshold (float): The ADX threshold above which the market is considered trending.
+
+        Returns:
+            bool: True if ADX >= threshold (trending market), otherwise False.
+        """
+        adx = self.get_adx()
+        return adx is not False and adx >= threshold
+
+
+# example use
 if __name__ == "__main__":
 
-    # 模拟数据示例
     data = {
-        "high": [1.10, 1.12, 1.14, 1.13, 1.12, 1.15, 1.17, 1.18, 1.16, 1.19, 1.18, 1.20, 1.10, 1.12, 1.14, 1.13, 1.12, 1.15, 1.17, 1.18, 1.16, 1.19, 1.18, 1.20, 
-                 1.10, 1.12, 1.14, 1.13, 1.12, 1.15, 1.17, 1.18, 1.16, 1.19, 1.18, 1.20, 1.10, 1.12, 1.14, 1.13, 1.12, 1.15, 1.17, 1.18, 1.16, 1.19, 1.18, 1.20,
-                 1.10, 1.12, 1.14, 1.13, 1.12, 1.15, 1.17, 1.18, 1.16, 1.19, 1.18, 1.20, 1.10, 1.12, 1.14, 1.13, 1.12, 1.15, 1.17, 1.18, 1.16, 1.19, 1.18, 1.20,
-                 1.10, 1.12, 1.14, 1.13, 1.12, 1.15, 1.17, 1.18, 1.16, 1.19, 1.18, 1.20, 1.10, 1.12, 1.14, 1.13, 1.12, 1.15, 1.17, 1.18, 1.16, 1.19, 1.18, 1.20],
-        "low": [1.08, 1.10, 1.12, 1.11, 1.10, 1.13, 1.15, 1.16, 1.14, 1.17, 1.16, 1.18, 1.10, 1.12, 1.14, 1.13, 1.12, 1.15, 1.17, 1.18, 1.16, 1.19, 1.18, 1.20,
-                1.10, 1.12, 1.14, 1.13, 1.12, 1.15, 1.17, 1.18, 1.16, 1.19, 1.18, 1.20, 1.10, 1.12, 1.14, 1.13, 1.12, 1.15, 1.17, 1.18, 1.16, 1.19, 1.18, 1.20,
-                1.08, 1.10, 1.12, 1.11, 1.10, 1.13, 1.15, 1.16, 1.14, 1.17, 1.16, 1.18, 1.10, 1.12, 1.14, 1.13, 1.12, 1.15, 1.17, 1.18, 1.16, 1.19, 1.18, 1.20,
-                1.09, 1.11, 1.13, 1.12, 1.11, 1.14, 1.16, 1.17, 1.15, 1.18, 1.17, 1.19, 1.10, 1.12, 1.14, 1.13, 1.12, 1.15, 1.17, 1.18, 1.16, 1.19, 1.18, 1.20],
-        "close": [1.09, 1.11, 1.13, 1.12, 1.11, 1.14, 1.16, 1.17, 1.15, 1.18, 1.17, 1.19, 1.10, 1.12, 1.14, 1.13, 1.12, 1.15, 1.17, 1.18, 1.16, 1.19, 1.18, 1.20,
-                  1.09, 1.11, 1.13, 1.12, 1.11, 1.14, 1.16, 1.17, 1.15, 1.18, 1.17, 1.19, 1.10, 1.12, 1.14, 1.13, 1.12, 1.15, 1.17, 1.18, 1.16, 1.19, 1.18, 1.20,
-                  1.10, 1.12, 1.14, 1.13, 1.12, 1.15, 1.17, 1.18, 1.16, 1.19, 1.18, 1.20, 1.10, 1.12, 1.14, 1.13, 1.12, 1.15, 1.17, 1.18, 1.16, 1.19, 1.18, 1.20,
-                  1.08, 1.10, 1.12, 1.11, 1.10, 1.13, 1.15, 1.16, 1.14, 1.17, 1.16, 1.18, 1.10, 1.12, 1.14, 1.13, 1.12, 1.15, 1.17, 1.18, 1.16, 1.19, 1.18, 1.20]
+        "high": [
+            1.10,
+            1.12,
+            1.14,
+            1.13,
+            1.12,
+            1.15,
+            1.17,
+            1.18,
+            1.16,
+            1.19,
+            1.18,
+            1.20,
+            1.10,
+            1.12,
+            1.14,
+            1.13,
+            1.12,
+            1.15,
+            1.17,
+            1.18,
+            1.16,
+            1.19,
+            1.18,
+            1.20,
+            1.10,
+            1.12,
+            1.14,
+            1.13,
+            1.12,
+            1.15,
+            1.17,
+            1.18,
+            1.16,
+            1.19,
+            1.18,
+            1.20,
+            1.10,
+            1.12,
+            1.14,
+            1.13,
+            1.12,
+            1.15,
+            1.17,
+            1.18,
+            1.16,
+            1.19,
+            1.18,
+            1.20,
+            1.10,
+            1.12,
+            1.14,
+            1.13,
+            1.12,
+            1.15,
+            1.17,
+            1.18,
+            1.16,
+            1.19,
+            1.18,
+            1.20,
+            1.10,
+            1.12,
+            1.14,
+            1.13,
+            1.12,
+            1.15,
+            1.17,
+            1.18,
+            1.16,
+            1.19,
+            1.18,
+            1.20,
+            1.10,
+            1.12,
+            1.14,
+            1.13,
+            1.12,
+            1.15,
+            1.17,
+            1.18,
+            1.16,
+            1.19,
+            1.18,
+            1.20,
+            1.10,
+            1.12,
+            1.14,
+            1.13,
+            1.12,
+            1.15,
+            1.17,
+            1.18,
+            1.16,
+            1.19,
+            1.18,
+            1.20,
+        ],
+        "low": [
+            1.08,
+            1.10,
+            1.12,
+            1.11,
+            1.10,
+            1.13,
+            1.15,
+            1.16,
+            1.14,
+            1.17,
+            1.16,
+            1.18,
+            1.10,
+            1.12,
+            1.14,
+            1.13,
+            1.12,
+            1.15,
+            1.17,
+            1.18,
+            1.16,
+            1.19,
+            1.18,
+            1.20,
+            1.10,
+            1.12,
+            1.14,
+            1.13,
+            1.12,
+            1.15,
+            1.17,
+            1.18,
+            1.16,
+            1.19,
+            1.18,
+            1.20,
+            1.10,
+            1.12,
+            1.14,
+            1.13,
+            1.12,
+            1.15,
+            1.17,
+            1.18,
+            1.16,
+            1.19,
+            1.18,
+            1.20,
+            1.08,
+            1.10,
+            1.12,
+            1.11,
+            1.10,
+            1.13,
+            1.15,
+            1.16,
+            1.14,
+            1.17,
+            1.16,
+            1.18,
+            1.10,
+            1.12,
+            1.14,
+            1.13,
+            1.12,
+            1.15,
+            1.17,
+            1.18,
+            1.16,
+            1.19,
+            1.18,
+            1.20,
+            1.09,
+            1.11,
+            1.13,
+            1.12,
+            1.11,
+            1.14,
+            1.16,
+            1.17,
+            1.15,
+            1.18,
+            1.17,
+            1.19,
+            1.10,
+            1.12,
+            1.14,
+            1.13,
+            1.12,
+            1.15,
+            1.17,
+            1.18,
+            1.16,
+            1.19,
+            1.18,
+            1.20,
+        ],
+        "close": [
+            1.09,
+            1.11,
+            1.13,
+            1.12,
+            1.11,
+            1.14,
+            1.16,
+            1.17,
+            1.15,
+            1.18,
+            1.17,
+            1.19,
+            1.10,
+            1.12,
+            1.14,
+            1.13,
+            1.12,
+            1.15,
+            1.17,
+            1.18,
+            1.16,
+            1.19,
+            1.18,
+            1.20,
+            1.09,
+            1.11,
+            1.13,
+            1.12,
+            1.11,
+            1.14,
+            1.16,
+            1.17,
+            1.15,
+            1.18,
+            1.17,
+            1.19,
+            1.10,
+            1.12,
+            1.14,
+            1.13,
+            1.12,
+            1.15,
+            1.17,
+            1.18,
+            1.16,
+            1.19,
+            1.18,
+            1.20,
+            1.10,
+            1.12,
+            1.14,
+            1.13,
+            1.12,
+            1.15,
+            1.17,
+            1.18,
+            1.16,
+            1.19,
+            1.18,
+            1.20,
+            1.10,
+            1.12,
+            1.14,
+            1.13,
+            1.12,
+            1.15,
+            1.17,
+            1.18,
+            1.16,
+            1.19,
+            1.18,
+            1.20,
+            1.08,
+            1.10,
+            1.12,
+            1.11,
+            1.10,
+            1.13,
+            1.15,
+            1.16,
+            1.14,
+            1.17,
+            1.16,
+            1.18,
+            1.10,
+            1.12,
+            1.14,
+            1.13,
+            1.12,
+            1.15,
+            1.17,
+            1.18,
+            1.16,
+            1.19,
+            1.18,
+            1.20,
+        ],
     }
     df = pd.DataFrame(data)
-    
-    adx_analyzer = ADX(df)
-    
-    # 获取 ADX
-    adx_value = adx_analyzer.get_adx()
+
+    adx_instance = ADX(df)
+
+    adx_value = adx_instance.get_adx()
     print(f"ADX: {adx_value}")
-    
-    # 判断是否为震荡市场
-    if adx_analyzer.is_range_market(35):
-        print("市场处于震荡状态。")
-    elif adx_analyzer.is_trending_market(35):
-        print("市场处于趋势状态。")
+
+    if adx_instance.is_range_market(35):
+        print("Market is in range.")
     else:
-        print("没判断出来！")
+        print("Market is in trending.")
