@@ -3,83 +3,120 @@ import talib
 
 
 class MACD:
-    def __init__(self, df, fastperiod=12, slowperiod=26, signalperiod=9):
+    """
+    A wrapper for calculating the MACD (Moving Average Convergence Divergence) using TA-Lib.
+
+    """
+
+    def __init__(
+        self,
+        df: pd.DataFrame,
+        fastperiod: int = 12,
+        slowperiod: int = 26,
+        signalperiod: int = 9,
+    ):
         """
-        初始化 MACD 指标计算类
-        
-        参数：
-            df: pandas DataFrame, 必须包含 'close' 列
-            fastperiod: int, 快速 EMA 周期 (默认 12)
-            slowperiod: int, 慢速 EMA 周期 (默认 26)
-            signalperiod: int, 信号线 EMA 周期 (默认 9)
+        Initialize the MACD calculator.
+
+        Args:
+            df (pd.DataFrame): A DataFrame with a 'close' price column.
+            fastperiod (int): Fast EMA period. Default is 12.
+            slowperiod (int): Slow EMA period. Default is 26.
+            signalperiod (int): Signal line EMA period. Default is 9.
+
+        Raises:
+            ValueError: If the 'close' column is not found in the DataFrame.
         """
-        if 'close' not in df.columns:
-            print("⚠️ 数据缺失 'close' 列, 无法计算 MACD! ")
-        
-        self.df = df
+        self.df = df.copy()
         self.fastperiod = fastperiod
         self.slowperiod = slowperiod
         self.signalperiod = signalperiod
 
-    def get_macd(self):
+        if "close" not in self.df.columns:
+            raise ValueError("⚠️ Missing columns 'close'. Cannot compute MACD.")
+
+    def get_macd(self, recent_n: int = 3) -> list[tuple[float, float, float]]:
         """
-        计算 MACD 指标
-        
-        返回：
-            tuple: (最新的 MACD 值, MACD 信号线, MACD 柱状图)
+        Compute the MACD line, signal line, and histogram.
+
+        Args:
+            recent_n (int): Number of most recent values to return. Default is 3.
+
+        Returns:
+            list[tuple[float, float, float]]: A list of tuples (macd, signal, histogram).
+
+        Raises:
+            ValueError: If insufficient data is available to compute MACD.
         """
-        if len(self.df) < self.slowperiod + 1:
-            print("⚠️ 数据量太少，无法计算 MACD! ")
+        if len(self.df) < self.slowperiod + recent_n:
+            raise ValueError(
+                f"⚠️ Insufficient data to calulate MACD. At least {self.slowperiod + recent_n} rows are needed."
+            )
+
+        macd, signal, hist = talib.MACD(
+            self.df["close"].to_numpy(),
+            fastperiod=self.fastperiod,
+            slowperiod=self.slowperiod,
+            signalperiod=self.signalperiod,
+        )
+
+        return list(
+            zip(
+                macd[-recent_n:],
+                signal[-recent_n:],
+                hist[-recent_n:],
+            )
+        )
+
+    def is_macd_bullish(self) -> bool:
+        """
+        Check if a bullish MACD crossover occurred (histogram turns positive from negative).
+
+        Returns:
+            bool: True if a bullish crossover is detected, False otherwise.
+        """
+        try:
+            macd_data = self.get_macd(recent_n=2)
+            return macd_data[-2][-1] < 0 and macd_data[-1][-1] > 0
+        except Exception as e:
+            print(f"[MACD Error] Failed to detect bullish crossover: {e}")
             return False
-        
-        macd, signal, hist = talib.MACD(self.df['close'], 
-                                        fastperiod=self.fastperiod, 
-                                        slowperiod=self.slowperiod, 
-                                        signalperiod=self.signalperiod)
-        return round(macd.iloc[-1], 3), round(signal.iloc[-1], 3), round(hist.iloc[-1], 3)
 
-    def is_macd_bullish(self):
+    def is_macd_bearish(self) -> bool:
         """
-        判断是否出现 MACD 金叉（多头信号）
-        
-        返回：
-            bool: 若 MACD 线上穿信号线，则返回 True (多头信号),否则返回 False
-        """
-        macd, signal, _ = self.get_macd()
-        return macd > signal  # MACD 线上穿信号线，表示金叉（看涨信号）
+        Check if a bearish MACD crossover occurred (histogram turns negative from positive).
 
-    def is_macd_bearish(self):
+        Returns:
+            bool: True if a bearish crossover is detected, False otherwise.
         """
-        判断是否出现 MACD 死叉（空头信号）
-        
-        返回：
-            bool: 若 MACD 线下穿信号线，则返回 True(空头信号), 否则返回 False
-        """
-        macd, signal, _ = self.get_macd()
-        return macd < signal  # MACD 线下穿信号线，表示死叉（看跌信号）
+        try:
+            macd_data = self.get_macd(recent_n=2)
+            return macd_data[-2][-1] > 0 and macd_data[-1][-1] < 0
+        except Exception as e:
+            print(f"[MACD Error] Failed to detect bearish crossover: {e}")
+            return False
 
-# 示例用法
+
 if __name__ == "__main__":
-    data = {
-        'time': pd.date_range(start='2023-01-01', periods=100, freq='D'),
-        'close': [100 + (i * 0.5) + (i % 5) * 2 for i in range(100)]  # 示例收盘价数据
-    }
-    df = pd.DataFrame(data)
 
-    # 创建 macd 实例
+    data = {
+        "time": pd.date_range(start="2023-01-01", periods=100, freq="D"),
+        "close": [100 + (i * 0.5) + (i % 5) * 2 for i in range(100)],
+    }
+
+    df = pd.DataFrame(data)
     macd_analyzer = MACD(df)
 
-    # 获取 MACD 值和信号线
-    macd, signal, hist = macd_analyzer.get_macd()
+    try:
+        macd_data = macd_analyzer.get_macd()
+        is_bullish = macd_analyzer.is_macd_bullish()
+        is_bearish = macd_analyzer.is_macd_bearish()
 
-    # 判断是否出现金叉（多头信号）和死叉（空头信号）
-    is_bullish = macd_analyzer.is_macd_bullish()
-    is_bearish = macd_analyzer.is_macd_bearish()
+        print("Recent MACD values (MACD, Signal, Histogram):")
+        for m, s, h in macd_data:
+            print(f"MACD: {m:.4f}, Signal: {s:.4f}, Histogram: {h:.4f}")
 
-    # 输出结果
-    print(f"MACD: {macd}, Signal: {signal}, Histogram: {hist}")
-    print(f"是否金叉：{is_bullish}")
-    print(f"是否死叉：{is_bearish}")
-
-
-
+        print(f"Bullish Crossover: {is_bullish}")
+        print(f"Bearish Crossover: {is_bearish}")
+    except Exception as e:
+        print(f"[Main Error] {e}")
