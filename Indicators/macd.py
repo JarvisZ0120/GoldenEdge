@@ -60,13 +60,10 @@ class MACD:
             signalperiod=self.signalperiod,
         )
 
-        return list(
-            zip(
-                macd[-recent_n:],
-                signal[-recent_n:],
-                hist[-recent_n:],
-            )
-        )
+        return [
+            (round(float(m), 3), round(float(s), 3), round(float(h), 3))
+            for m, s, h in zip(macd[-3:], signal[-3:], hist[-3:])
+        ]
 
     def is_macd_bullish(self) -> bool:
         """
@@ -111,10 +108,10 @@ if __name__ == "__main__":
         macd_data = macd_analyzer.get_macd()
         is_bullish = macd_analyzer.is_macd_bullish()
         is_bearish = macd_analyzer.is_macd_bearish()
-
+        print(f"MACD: {macd_data}")
         print("Recent MACD values (MACD, Signal, Histogram):")
         for m, s, h in macd_data:
-            print(f"MACD: {m:.4f}, Signal: {s:.4f}, Histogram: {h:.4f}")
+            print(f"MACD: {m}, Signal: {s}, Histogram: {h}")
 
         print(f"Bullish Crossover: {is_bullish}")
         print(f"Bearish Crossover: {is_bearish}")
