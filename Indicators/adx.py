@@ -3,37 +3,45 @@ import talib
 
 
 class ADX:
+    """
+    A wrapper class for calculating the Average Directional Index (ADX) using TA-Lib.
+
+    """
+
     def __init__(self, df: pd.DataFrame, timeperiod: int = 14) -> None:
         """
-        Initialize the ADX class for calculating the Average Directional Index.
+        Initialize the ADX calculator.
 
         Args:
-            df (pd.DataFrame): A DataFrame that must contain 'high', 'low', and 'close' columns.
-            timeperiod (int, optional): Period for calculating ADX. Default is 14.
+            df (pd.DataFrame): A DataFrame with 'high', 'low', and 'close' price columns.
+            timeperiod (int, optional): Period length for ADX calculation. Default is 14.
 
         Raises:
-            ValueError: If the required columns are missing in the input DataFrame.
+            ValueError: If the required columns are not found in the input DataFrame.
         """
-        required_cols = ["high", "low", "close"]
-        if not all(col in df.columns for col in required_cols):
+        self.required_cols = ["high", "low", "close"]
+        self.df = df.copy()
+        self.timeperiod = timeperiod
+
+        if not all(col in self.df.columns for col in self.required_cols):
             raise ValueError(
                 "⚠️ Missing columns 'high', 'low', or 'close'. Cannot compute ADX."
             )
 
-        self.df = df
-        self.timeperiod = timeperiod
-
-    def get_adx(self) -> float | bool:
+    def get_adx(self) -> float:
         """
         Calculate and return the most recent ADX value.
 
         Returns:
             float: The latest ADX value (rounded to 3 decimal places).
             bool: False if there is insufficient data to calculate ADX.
+        Raises:
+            ValueError: If the DataFrame does not contain enough data to compute ADX.
         """
         if len(self.df) < self.timeperiod + 1:
-            print("⚠️ Not enough data to compute ADX.")
-            return False
+            raise ValueError(
+                f"⚠️ Insufficient data to calulate ADX. At least {self.timeperiod + 1} rows are needed."
+            )
 
         adx_array = talib.ADX(
             self.df["high"].to_numpy(),
@@ -41,6 +49,7 @@ class ADX:
             self.df["close"].to_numpy(),
             timeperiod=self.timeperiod,
         )
+
         return round(adx_array[-1], 3)
 
     def is_range_market(self, threshold: float) -> bool:
@@ -369,14 +378,17 @@ if __name__ == "__main__":
             1.20,
         ],
     }
+
     df = pd.DataFrame(data)
+    adx_analyzer = ADX(df)
 
-    adx_instance = ADX(df)
+    try:
+        adx_value = adx_analyzer.get_adx()
+        print(f"ADX: {adx_value}")
+    except ValueError as e:
+        print(f"[Main Error] {e}")
 
-    adx_value = adx_instance.get_adx()
-    print(f"ADX: {adx_value}")
-
-    if adx_instance.is_range_market(35):
+    if adx_analyzer.is_range_market(35):
         print("Market is in range.")
     else:
         print("Market is in trending.")
