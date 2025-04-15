@@ -1,4 +1,11 @@
-1. 
+Name: APR TEN
+Server: MetaQuotes-Demo
+Account Type: Forex Netting USD (1:1)
+Account Balance: 1000 USD 
+Login: 91738508
+Password: *g6yZqXc
+Investor (Read-only Password): 0yU_StKt
+
 Name: Damon jar
 Server: MetaQuotes-Demo
 Account Type: Forex Hedged USD (1:100)
@@ -7,17 +14,6 @@ Login: 5033993521
 Password: G!I0FwJn
 Investor (Read-only Password): _sJbPxE4 
 
-
-2.
-Name: Damon jar
-Server: MetaQuotes-Demo
-Account Type: Forex Hedged USD (1:100)
-Account Balance: 1000 USD 
-Login: 90685029
-Password: 0f*g5t0b
-Investor (Read-only Password): QpF*G1Wr
-
-2. 
 Name: asd asd
 Server: MetaQuotes-Demo
 Account Type: Forex Hedged USD (1:100)
