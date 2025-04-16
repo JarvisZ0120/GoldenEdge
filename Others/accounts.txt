@@ -2,9 +2,9 @@ Name: APR TEN
 Server: MetaQuotes-Demo
 Account Type: Forex Netting USD (1:1)
 Account Balance: 1000 USD 
-Login: 91738508
-Password: *g6yZqXc
-Investor (Read-only Password): 0yU_StKt
+Login: 5035257814
+Password: !7XvJjRs
+Investor (Read-only Password): *2WeVwDv
 
 Name: Damon jar
 Server: MetaQuotes-Demo
