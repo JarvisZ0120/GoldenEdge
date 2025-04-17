@@ -27,20 +27,25 @@ class RSI:
                 "⚠️ Missing 'close' column in the DataFrame. Cannot compute RSI."
             )
 
-    def get_rsi(self) -> list[float]:
+    def get_rsi(self, recent_n: int = 3) -> list[float]:
         """
         Calculates the RSI value.
 
+        Args:
+            recent_n (int): Number of most recent values to return. Default is 3.
+
         Returns:
-            list: Last 3 RSI values as a list of floats, or False if data is insufficient.
+            list[float]: Last 3 RSI values as a list of floats, or False if data is insufficient.
+         Raises:
+            ValueError: If insufficient data is available to compute RSI.
         """
-        if len(self.df) < self.timeperiod + 3:
+        if len(self.df) < self.timeperiod + recent_n:
             raise ValueError(
-                f"⚠️ Insufficient data to calculate RSI: At least {self.timeperiod + 3} rows are needed."
+                f"⚠️ Insufficient data to calculate RSI: At least {self.timeperiod + recent_n} rows are needed."
             )
 
         rsi_array = talib.RSI(self.df["close"].to_numpy(), timeperiod=self.timeperiod)
-        return list(round(float(val), 3) for val in rsi_array[-3:])
+        return list(round(float(val), 3) for val in rsi_array[-1 * recent_n :])
 
     def is_overbought(self, threshold: float = 70):
         """
