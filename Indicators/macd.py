@@ -62,7 +62,9 @@ class MACD:
 
         return [
             (round(float(m), 3), round(float(s), 3), round(float(h), 3))
-            for m, s, h in zip(macd[-3:], signal[-3:], hist[-3:])
+            for m, s, h in zip(
+                macd[-1 * recent_n :], signal[-1 * recent_n :], hist[-1 * recent_n :]
+            )
         ]
 
     def is_macd_bullish(self) -> bool:
