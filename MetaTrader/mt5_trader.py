@@ -19,15 +19,6 @@ class MT5Trader:
         self.logger = logger
         self.is_connected = False
 
-    def get_mt5(self) -> mt5.mt5:
-        """
-        Get the MetaTrader5 module instance.
-
-        Returns:
-            MetaTrader5: The MetaTrader5 module for executing trading operations.
-        """
-        return mt5
-
     def connect(self, account: int, password: str, server: str) -> bool:
         """
         Connect to MetaTrader5 with the given account credentials.
