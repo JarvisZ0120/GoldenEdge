@@ -124,6 +124,65 @@ class MT5Trader:
             raise ValueError("⚠️ Failed to retrieve positions.")
         return len(positions)
 
+    def close_position(self, symbol: str, direction: str) -> None:
+        """
+        Close all open positions for a given symbol and side.
+
+        Args:
+            symbol (str): Trading symbol, e.g. "XAUUSD".
+            direction (str): Side to close: "buy" for long positions, "sell" for short positions.
+
+        Raises:
+            ValueError: If unable to fetch positions or if the close order fails.
+        """
+        # Fetch all positions for this symbol
+        positions = mt5.positions_get(symbol=symbol)
+        if positions is None:
+            self.logger.error(" ⚠️ Failed to retrieve open positions.")
+            raise ValueError(" ⚠️ Failed to retrieve open positions.")
+
+        for pos in positions:
+            # mt5.POSITION_TYPE_BUY == 0 (long), POSITION_TYPE_SELL == 1 (short)
+            if direction.lower() == "buy" and pos.type == mt5.POSITION_TYPE_BUY:
+                close_type = mt5.ORDER_TYPE_SELL
+                volume = pos.volume
+            elif direction.lower() == "sell" and pos.type == mt5.POSITION_TYPE_SELL:
+                close_type = mt5.ORDER_TYPE_BUY
+                volume = pos.volume
+            else:
+                continue  # skip positions that don’t match the target side
+
+            # Get current market price
+            tick = mt5.symbol_info_tick(symbol)
+            if tick is None:
+                self.logger.error(f"⚠️ Failed to get tick data for {symbol}.")
+                raise ValueError(f"⚠️ Failed to get tick data for {symbol}.")
+
+            price = tick.bid if close_type == mt5.ORDER_TYPE_SELL else tick.ask
+
+            # Build the close order request
+            request = {
+                "action": mt5.TRADE_ACTION_DEAL,
+                "symbol": symbol,
+                "volume": volume,
+                "type": close_type,
+                "position": pos.ticket,
+                "price": price,
+                "type_time": mt5.ORDER_TIME_GTC,
+                "type_filling": mt5.ORDER_FILLING_IOC,
+            }
+
+            result = mt5.order_send(request)
+            if result is None or result.retcode != mt5.TRADE_RETCODE_DONE:
+                error_comment = result.comment if result else "No result returned"
+                self.logger.error(f" ⚠️ Close order failed: {error_comment}")
+                # raise ValueError(f" ⚠️ Close order failed: {error_comment}")
+
+            self.logger.info(
+                f" ✅ Successfully closed position ticket={pos.ticket}, volume={volume}"
+            )
+            print(f" ✅ Position closed: ticket={pos.ticket}, volume={volume}")
+
     def remove_pending_orders(self, order_type: str | None = None) -> None:
         """
         Remove pending orders from MetaTrader5.
@@ -258,7 +317,7 @@ class MT5Trader:
         else:
             print(f" ⚠️ Order failed: {result.comment}")
             self.logger.error(" ⚠️ Order failed: %s", result.comment)
-            raise ValueError(f" ⚠️ Order failed: {result.comment}")
+            # raise ValueError(f" ⚠️ Order failed: {result.comment}")
 
     def place_grid_orders(
         self,
